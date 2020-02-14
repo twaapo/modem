@@ -133,8 +133,8 @@ func (a *AT) Init(ctx context.Context) error {
 	a.startWriteGuard()
 
 	cmds := []string{
-		"Z",       // reset to factory defaults (also clears the escape from the rx buffer)
-		"^CURC=0", // disable general indications ^XXXX
+		"Z",  // reset to factory defaults (also clears the escape from the rx buffer)
+		"E0", // disable echo
 	}
 	for _, cmd := range cmds {
 		_, err := a.Command(ctx, cmd)
@@ -352,6 +352,14 @@ func (a *AT) waitWriteGuard() {
 			}
 		}
 	}
+}
+
+// WriteCommand writes a one line command to the modem.
+func (a *AT) WriteCommand(cmd string) error {
+	a.waitWriteGuard()
+	cmdLine := "AT" + cmd + "\r\n"
+	_, err := a.modem.Write([]byte(cmdLine))
+	return err
 }
 
 // writeCommand writes a one line command to the modem.
